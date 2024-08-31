@@ -18,7 +18,6 @@ import static java.util.stream.Collectors.joining;
 
 import com.beust.jcommander.internal.Maps;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import io.openmessaging.benchmark.utils.ListPartition;
 import io.openmessaging.benchmark.worker.commands.ConsumerAssignment;
@@ -45,7 +44,7 @@ public class DistributedWorkersEnsemble implements Worker {
     private int numberOfUsedProducerWorkers;
 
     public DistributedWorkersEnsemble(List<Worker> workers, boolean extraConsumerWorkers) {
-        Preconditions.checkArgument(workers.size() > 1);
+        // Preconditions.checkArgument(workers.size() > 1);
         this.workers = unmodifiableList(workers);
         leader = workers.get(0);
         int numberOfProducerWorkers = getNumberOfProducerWorkers(workers, extraConsumerWorkers);

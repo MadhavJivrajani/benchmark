@@ -13,12 +13,6 @@
  */
 package io.openmessaging.benchmark.driver.kafka;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
-import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
-
-import io.openmessaging.benchmark.driver.BenchmarkDriver.TopicInfo;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -29,13 +23,20 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import java.util.concurrent.atomic.AtomicInteger;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
+
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.common.KafkaFuture;
 import org.apache.kafka.common.errors.TopicExistsException;
+
+import io.openmessaging.benchmark.driver.BenchmarkDriver.TopicInfo;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -70,7 +71,9 @@ class KafkaTopicCreator {
         try {
             while (succeeded.get() < topicInfos.size()) {
                 int batchSize = queue.drainTo(batch, maxBatchSize);
+                log.info("Batch size: {}", batchSize);
                 if (batchSize > 0) {
+                    log.info("batch: {}", batch);
                     executeBatch(batch)
                             .forEach(
                                     (topicInfo, success) -> {
@@ -94,6 +97,14 @@ class KafkaTopicCreator {
         Map<String, TopicInfo> lookup = batch.stream().collect(toMap(TopicInfo::getTopic, identity()));
 
         List<NewTopic> newTopics = batch.stream().map(this::newTopic).collect(toList());
+        log.info("New topics: {}", newTopics);
+
+        try {
+            admin.createTopics(newTopics).values().entrySet().stream()
+                .collect(toMap(e -> lookup.get(e.getKey()), e -> isSuccess(e.getValue())));
+        } catch (Exception e) {
+            log.info("Exception: {}", e);
+        }
 
         return admin.createTopics(newTopics).values().entrySet().stream()
                 .collect(toMap(e -> lookup.get(e.getKey()), e -> isSuccess(e.getValue())));

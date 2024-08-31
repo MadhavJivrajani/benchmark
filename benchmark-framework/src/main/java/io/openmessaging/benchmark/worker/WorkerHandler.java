@@ -13,21 +13,23 @@
  */
 package io.openmessaging.benchmark.worker;
 
+import java.io.File;
+import java.util.List;
+
+import org.apache.bookkeeper.stats.StatsLogger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.google.common.io.Files;
+
 import io.javalin.Context;
 import io.javalin.Javalin;
 import io.openmessaging.benchmark.worker.commands.ConsumerAssignment;
 import io.openmessaging.benchmark.worker.commands.ProducerWorkAssignment;
 import io.openmessaging.benchmark.worker.commands.TopicsInfo;
 import io.openmessaging.benchmark.worker.jackson.ObjectMappers;
-import java.io.File;
-import java.util.List;
-import org.apache.bookkeeper.stats.StatsLogger;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("unchecked")
 public class WorkerHandler {
@@ -79,6 +81,7 @@ public class WorkerHandler {
     private void handleCreateTopics(Context ctx) throws Exception {
         TopicsInfo topicsInfo = mapper.readValue(ctx.body(), TopicsInfo.class);
         log.info("Received create topics request for topics: {}", ctx.body());
+        log.info(localWorker.toString());
         List<String> topics = localWorker.createTopics(topicsInfo);
         ctx.result(writer.writeValueAsString(topics));
     }

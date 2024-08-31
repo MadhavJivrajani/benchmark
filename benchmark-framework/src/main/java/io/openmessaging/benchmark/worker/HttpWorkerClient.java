@@ -13,6 +13,22 @@
  */
 package io.openmessaging.benchmark.worker;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.List;
+
+import org.asynchttpclient.AsyncHttpClient;
+import org.asynchttpclient.Dsl;
+import static org.asynchttpclient.Dsl.asyncHttpClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+import com.google.common.base.Preconditions;
+
 import static io.openmessaging.benchmark.worker.WorkerHandler.ADJUST_PUBLISH_RATE;
 import static io.openmessaging.benchmark.worker.WorkerHandler.COUNTERS_STATS;
 import static io.openmessaging.benchmark.worker.WorkerHandler.CREATE_CONSUMERS;
@@ -27,11 +43,6 @@ import static io.openmessaging.benchmark.worker.WorkerHandler.RESET_STATS;
 import static io.openmessaging.benchmark.worker.WorkerHandler.RESUME_CONSUMERS;
 import static io.openmessaging.benchmark.worker.WorkerHandler.START_LOAD;
 import static io.openmessaging.benchmark.worker.WorkerHandler.STOP_ALL;
-import static org.asynchttpclient.Dsl.asyncHttpClient;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
-import com.google.common.base.Preconditions;
 import io.openmessaging.benchmark.worker.commands.ConsumerAssignment;
 import io.openmessaging.benchmark.worker.commands.CountersStats;
 import io.openmessaging.benchmark.worker.commands.CumulativeLatencies;
@@ -39,15 +50,6 @@ import io.openmessaging.benchmark.worker.commands.PeriodStats;
 import io.openmessaging.benchmark.worker.commands.ProducerWorkAssignment;
 import io.openmessaging.benchmark.worker.commands.TopicsInfo;
 import io.openmessaging.benchmark.worker.jackson.ObjectMappers;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.List;
-import org.asynchttpclient.AsyncHttpClient;
-import org.asynchttpclient.Dsl;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class HttpWorkerClient implements Worker {
 
